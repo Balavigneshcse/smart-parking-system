@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Smart Parking Syatem</title>
+<link rel="stylesheet" href="/css/main.css">
+</head>
+<body class="cinematic">
+
+<nav class="navbar">
+  <div class="inner">
+    <a href="/" class="brand">
+      <div class="brand-icon">P</div>
+      <span class="brand-name">SmartPark</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#live-preview">Live Status</a></li>
+      <li><a href="#access">Portals</a></li>
+      <li><a href="/customer/login.html" class="btn-nav">Sign In</a></li>
+    </ul>
+    <div class="hamburger" id="nav-toggle">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-text animate-fade-down">
+        <div class="hero-badge">Tamil Nadu's  Parking Platform</div>
+        <h1>Park Smarter.<br><span class="grad">Drive Effortlessly.</span></h1>
+        <p>Real-time occupancy tracking, instant digital booking.</p>
+        <div class="hero-buttons">
+          <a href="/customer/register.html" class="btn btn-primary btn-lg">Get Started Free</a>
+          <a href="#access" class="btn btn-secondary btn-lg">View Portals</a>
+        </div>
+        <div style="display:flex;gap:48px;margin-top:56px;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,0.1);padding-top:28px">
+          <div><div class="stat-value" style="color:#fff" id="c-airports">4</div><div class="stat-label" style="color:var(--link-cool-1)">TN Airports</div></div>
+          <div><div class="stat-value" style="color:var(--aloe)" id="c-spaces">320</div><div class="stat-label" style="color:var(--link-cool-1)">Smart Slots</div></div>
+          <div><div class="stat-value" style="color:var(--pistachio)" id="c-accuracy">99.8%</div><div class="stat-label" style="color:var(--link-cool-1)">ANPR Accuracy</div></div>
+        </div>
+      </div>
+      <div class="hero-visual animate-fade-up">
+        <div class="hero-image-wrap">
+          <img src="https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80" alt="Smart Parking">
+          <div class="hero-floating-badge hfb-top">
+            <span class="mi" style="font-size:20px;color:#4ade80">sensors</span>
+            <div><div style="font-size:12px;color:var(--link-cool-1);letter-spacing:0.72px">LIVE</div>
+              <div style="font-weight:550;font-size:14px;color:var(--aloe)">94% Available</div></div>
+          </div>
+          <div class="hero-floating-badge hfb-bottom">
+            <span class="mi" style="font-size:20px;color:var(--pistachio)">bolt</span>
+            <div><div style="font-size:12px;color:var(--link-cool-1);letter-spacing:0.72px">EV CHARGING</div>
+              <div style="font-weight:550;font-size:14px;color:var(--pistachio)">18 Bays Active</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Live Preview -->
+<section class="section" id="live-preview">
+  <div class="container">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:24px">
+        <div>
+          <span class="section-label" style="margin-bottom:4px">Live Network</span>
+          <h2 style="font-size:28px;margin-top:4px;font-weight:330">Real-Time Hub Monitor</h2>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="hub-tabs">
+          <button class="btn btn-sm btn-primary hub-btn active" data-hub="maa">Chennai</button>
+          <button class="btn btn-sm btn-ghost hub-btn" data-hub="cjb">Coimbatore</button>
+          <button class="btn btn-sm btn-ghost hub-btn" data-hub="ixm">Madurai</button>
+          <button class="btn btn-sm btn-ghost hub-btn" data-hub="trz">Trichy</button>
+        </div>
+      </div>
+      <div class="occupancy-grid" id="live-grid"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08)">
+        <div class="occupancy-legend">
+          <div class="legend-item"><div class="legend-dot available"></div>Available</div>
+          <div class="legend-item"><div class="legend-dot ev"></div>EV</div>
+          <div class="legend-item"><div class="legend-dot occupied"></div>Occupied</div>
+          <div class="legend-item"><div class="legend-dot reserved"></div>Reserved</div>
+        </div>
+        <a href="/customer/login.html" class="btn btn-sm btn-primary">Book a Slot <span class="mi" style="font-size:1.1em">arrow_forward</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="section" id="features">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:48px">
+      <span class="section-label">Platform Features</span>
+      <h2 class="section-title">Engineered for Seamless Mobility</h2>
+      <p class="section-sub" style="margin:0 auto">From real-time sensor maps to automated billing — a full suite of intelligent parking tools.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card animate-fade-up"><div class="feature-icon" style="background:rgba(193,251,212,0.12)"><span class="mi">sensors</span></div><h3>IoT Sensor Maps</h3><p>Every slot monitored 24/7 with real-time color-coded availability for all bay types.</p></div>
+      <div class="feature-card animate-fade-up" data-delay="1"><div class="feature-icon" style="background:rgba(212,249,224,0.12)"><span class="mi">bolt</span></div><h3>EV Charging</h3><p>Dedicated EV bays with automated kWh monitoring and priority green-lane entry.</p></div>
+      <div class="feature-card animate-fade-up" data-delay="2"><div class="feature-icon" style="background:rgba(193,251,212,0.12)"><span class="mi">photo_camera</span></div><h3>ANPR Automation</h3><p>No paper tickets. Cameras read plates instantly, log timestamps, auto-calculate fees.</p></div>
+      <div class="feature-card animate-fade-up" data-delay="1"><div class="feature-icon" style="background:rgba(212,249,224,0.12)"><span class="mi">qr_code_2</span></div><h3>60-Second Booking</h3><p>Reserve your slot from anywhere. Email confirmation with QR gate code.</p></div>
+      <div class="feature-card animate-fade-up" data-delay="2"><div class="feature-icon" style="background:rgba(193,251,212,0.12)"><span class="mi">monitoring</span></div><h3>Analytics</h3><p>Revenue insights, occupancy heatmaps, and peak-hour traffic forecasting.</p></div>
+      <div class="feature-card animate-fade-up" data-delay="3"><div class="feature-icon" style="background:rgba(212,249,224,0.12)"><span class="mi">admin_panel_settings</span></div><h3>6-Level Roles</h3><p>Enterprise security across Super Admin, State Manager, Admin, Manager, Security, and Customer.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Access Portals -->
+<section class="section" id="access">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:48px">
+      <span class="section-label">Access Portals</span>
+      <h2 class="section-title">Select Your Portal</h2>
+      <p class="section-sub" style="margin:0 auto">Secure role-based access for every stakeholder.</p>
+    </div>
+    <div class="role-cards">
+      <a href="/customer/login.html" class="role-card animate-fade-up">
+        <div class="r-icon" style="background:rgba(193,251,212,0.12)"><span class="mi">person</span></div>
+        <h3>Customer</h3><p>Book parking, manage reservations, track availability.</p>
+        <span class="r-arrow">Enter <span class="mi" style="font-size:1em">arrow_forward</span></span>
+      </a>
+      <a href="/admin/login.html" class="role-card animate-fade-up" data-delay="1">
+        <div class="r-icon" style="background:rgba(212,249,224,0.12)"><span class="mi">apartment</span></div>
+        <h3>Admin & Manager</h3><p>Manage zones, configure pricing, monitor revenue.</p>
+        <span class="r-arrow">Enter <span class="mi" style="font-size:1em">arrow_forward</span></span>
+      </a>
+      <a href="/staff/login.html" class="role-card animate-fade-up" data-delay="2">
+        <div class="r-icon" style="background:rgba(193,251,212,0.12)"><span class="mi">security</span></div>
+        <h3>Gate Security</h3><p>Check-in/out vehicles, ANPR lookup, toll receipts.</p>
+        <span class="r-arrow">Enter <span class="mi" style="font-size:1em">arrow_forward</span></span>
+      </a>
+      <a href="/super/login.html" class="role-card animate-fade-up" data-delay="3">
+        <div class="r-icon" style="background:rgba(212,249,224,0.12)"><span class="mi">workspace_premium</span></div>
+        <h3>Super Admin & State</h3><p>System governance, multi-hub audit logs, strategy.</p>
+        <span class="r-arrow">Enter <span class="mi" style="font-size:1em">arrow_forward</span></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="brand-icon" style="width:32px;height:32px;font-size:14px">P</div>
+        <span style="font-weight:500;font-size:1.1rem;color:#fff;font-family:var(--display-font)">SmartPark</span>
+      </div>
+      <div style="display:flex;gap:20px;font-size:14px">
+        <a href="#features">Features</a>
+        <a href="#access">Portals</a>
+        <a href="/customer/register.html">Sign Up</a>
+      </div>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,0.08);padding-top:16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <span> SmartPark ·  Tamil Nadu</span>
+      <span style="font-size:13px"> Owned by Balavignesh</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/api.js"></script>
+<script>
+// Hamburger toggle
+document.getElementById('nav-toggle')?.addEventListener('click', () => {
+  document.querySelector('.nav-links')?.classList.toggle('open');
+});
+
+// Live Hub simulation
+const hubData = {
+  maa: [{code:'A01',status:'available',t:'EV'},{code:'A02',status:'occupied',t:'R'},{code:'A03',status:'available',t:'R'},{code:'A04',status:'ev',t:'EV'},{code:'A05',status:'occupied',t:'R'},{code:'A06',status:'reserved',t:'R'},{code:'B01',status:'available',t:'R'},{code:'B02',status:'available',t:'R'},{code:'B03',status:'ev',t:'EV'},{code:'B04',status:'occupied',t:'R'},{code:'B05',status:'available',t:'R'},{code:'B06',status:'available',t:'R'}],
+  cjb: [{code:'C01',status:'available',t:'R'},{code:'C02',status:'available',t:'EV'},{code:'C03',status:'occupied',t:'R'},{code:'C04',status:'available',t:'R'},{code:'C05',status:'reserved',t:'R'},{code:'C06',status:'available',t:'R'},{code:'D01',status:'ev',t:'EV'},{code:'D02',status:'occupied',t:'R'},{code:'D03',status:'available',t:'R'},{code:'D04',status:'available',t:'R'}],
+  ixm: [{code:'M01',status:'occupied',t:'R'},{code:'M02',status:'occupied',t:'R'},{code:'M03',status:'available',t:'EV'},{code:'M04',status:'available',t:'R'},{code:'M05',status:'available',t:'R'},{code:'M06',status:'reserved',t:'R'},{code:'M07',status:'available',t:'R'},{code:'M08',status:'ev',t:'EV'}],
+  trz: [{code:'T01',status:'available',t:'EV'},{code:'T02',status:'available',t:'R'},{code:'T03',status:'available',t:'R'},{code:'T04',status:'occupied',t:'R'},{code:'T05',status:'available',t:'R'},{code:'T06',status:'available',t:'R'},{code:'T07',status:'ev',t:'EV'},{code:'T08',status:'available',t:'R'}]
+};
+
+function renderHub(key) {
+  const grid = document.getElementById('live-grid');
+  if (!grid) return;
+  const icons = {available:'local_parking',occupied:'directions_car',reserved:'lock',ev:'bolt'};
+  grid.innerHTML = (hubData[key]||hubData.maa).map(s =>
+    `<div class="space-cell ${s.status}" title="${s.code} · ${s.status.toUpperCase()}">
+      <span class="space-icon"><span class="mi">${icons[s.status]||'local_parking'}</span></span>
+      <span class="space-code">${s.code}</span>
+    </div>`
+  ).join('');
+}
+
+document.querySelectorAll('.hub-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.hub-btn').forEach(b => { b.classList.remove('btn-primary','active'); b.classList.add('btn-ghost'); });
+    btn.classList.remove('btn-ghost'); btn.classList.add('btn-primary','active');
+    renderHub(btn.dataset.hub);
+  });
+});
+renderHub('maa');
+</script>
+</body>
+</html>

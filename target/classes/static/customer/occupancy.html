@@ -1,0 +1,96 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Live Occupancy · SmartPark</title>
+<link rel="stylesheet" href="/css/main.css">
+</head><body>
+<div class="bg-mesh"></div>
+<nav class="navbar">
+  <div class="inner">
+    <a href="/customer/dashboard.html" class="brand"><div class="brand-icon">P</div><span class="brand-name">SmartPark</span></a>
+    <ul class="nav-links">
+      <li><a href="/customer/dashboard.html">Dashboard</a></li>
+      <li><a href="/customer/my-reservations.html">My Bookings</a></li>
+      <li><a href="#" class="logout-btn btn-nav">Logout</a></li>
+    </ul>
+    <div class="hamburger" onclick="document.querySelector('.nav-links').classList.toggle('open')"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+<div class="page-wrapper" style="padding:32px 0 60px">
+  <div class="container">
+    <div class="dash-header animate-fade-down" style="margin-bottom:16px">
+      <div><h1 id="place-name">Live Occupancy</h1><p id="place-sub" style="color:var(--text2)">Real-time availability</p></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div style="display:flex;align-items:center;gap:4px;font-size:.8rem;color:var(--emerald)"><div style="width:6px;height:6px;border-radius:50%;background:var(--emerald);animation:pulse 2s infinite"></div>Live</div>
+        <button id="refresh-btn" class="btn btn-ghost btn-sm"><span class="mi">refresh</span> Refresh</button>
+        <a id="book-link" href="#" class="btn btn-primary btn-sm">Book a Space</a>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:20px;padding:14px 20px">
+      <div class="occupancy-legend">
+        <div class="legend-item"><div class="legend-dot available"></div>Available</div>
+        <div class="legend-item"><div class="legend-dot occupied"></div>Occupied</div>
+        <div class="legend-item"><div class="legend-dot reserved"></div>Reserved</div>
+        <div class="legend-item"><div class="legend-dot ev"></div>EV</div>
+        <div class="legend-item"><div class="legend-dot maintenance"></div>Maintenance</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm filter-btn active" data-filter="ALL">All</button>
+      <button class="btn btn-ghost btn-sm filter-btn" data-filter="REGULAR">Regular</button>
+      <button class="btn btn-ghost btn-sm filter-btn" data-filter="COMPACT">Compact</button>
+      <button class="btn btn-ghost btn-sm filter-btn" data-filter="EV">EV</button>
+      <button class="btn btn-ghost btn-sm filter-btn" data-filter="ACCESSIBLE">Accessible</button>
+    </div>
+    <div id="map-container"><div style="display:flex;justify-content:center;padding:48px"><div class="spinner spinner-lg"></div></div></div>
+  </div>
+</div>
+<script src="/js/api.js"></script>
+<script src="/js/navbar.js"></script>
+<script>
+  API.requireRole('CUSTOMER');
+  const params=new URLSearchParams(location.search);const placeId=params.get('placeId');
+  if(!placeId)window.location.href='/customer/dashboard.html';
+  document.getElementById('book-link').href=`/customer/book.html?placeId=${placeId}`;
+  let currentFilter='ALL',zonesData=[];
+
+  function spaceClass(s){if(s.spaceType==='EV'&&s.status==='AVAILABLE')return'available ev';return s.status.toLowerCase();}
+  function spaceIcon(s){return{REGULAR:'local_parking',COMPACT:'directions_car',EV:'bolt',ACCESSIBLE:'accessible'}[s.spaceType]||'local_parking';}
+
+  function renderMap(){
+    const container=document.getElementById('map-container');let html='';
+    zonesData.forEach(zone=>{
+      const filtered=currentFilter==='ALL'?zone.spaces:zone.spaces.filter(s=>s.spaceType===currentFilter);
+      if(!filtered.length)return;
+      const avail=filtered.filter(s=>s.status==='AVAILABLE').length;
+      html+=`<div class="zone-section"><div class="zone-title"><span><span class="mi">location_on</span> ${zone.zoneName}</span><span class="zone-badge">Level ${zone.level||'—'}</span><span class="zone-stats">${avail}/${filtered.length} available</span></div><div class="occupancy-grid">`;
+      filtered.forEach(s=>{
+        const cls=spaceClass(s),clickable=s.status==='AVAILABLE';
+        html+=`<div class="space-cell ${cls}" title="${s.spaceType} · ${s.status}" onclick="${clickable?`bookSpace('${s.spaceType}')`:''}"><span class="space-icon"><span class="mi">${spaceIcon(s)}</span></span><span class="space-code">${s.code}</span></div>`;
+      });
+      html+=`</div></div>`;
+    });
+    container.innerHTML=html||'<div style="padding:40px;text-align:center;color:var(--text3)">No spaces match filter.</div>';
+  }
+
+  async function loadMap(){
+    try{
+      const data=await API.get(`/places/${placeId}/occupancy`,false);zonesData=data;
+      if(data.length>0){const total=data.reduce((s,z)=>s+z.spaces.length,0);const avail=data.reduce((s,z)=>s+z.spaces.filter(sp=>sp.status==='AVAILABLE').length,0);document.getElementById('place-sub').textContent=`${avail} of ${total} spaces available`;}
+      renderMap();
+    }catch(e){Toast.error(e.message);}
+  }
+
+  function bookSpace(type){window.location.href=`/customer/book.html?placeId=${placeId}&spaceType=${type}`;}
+
+  document.querySelectorAll('.filter-btn').forEach(btn=>{btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');currentFilter=btn.dataset.filter;renderMap();
+  });});
+  document.getElementById('refresh-btn').addEventListener('click',loadMap);
+
+  async function init(){
+    try{const places=await API.get('/places',false);const p=places.find(x=>x.id==placeId);if(p)document.getElementById('place-name').textContent=p.name;}catch{}
+    await loadMap();
+  }
+  init();setInterval(loadMap,30000);
+</script>
+</body></html>

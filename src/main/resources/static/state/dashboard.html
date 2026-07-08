@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>State Manager · SmartPark</title>
+<link rel="stylesheet" href="/css/main.css">
+</head><body>
+<div class="bg-mesh"></div>
+<div class="dash-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+        <div class="brand-icon">P</div>
+        <div><div class="brand-text">State Manager</div><div class="brand-sub" data-user-name></div></div>
+      </div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="#" class="active"><span class="nav-icon"><span class="mi">monitoring</span></span>Overview</a></li>
+      <li><a href="#create-admin"><span class="nav-icon"><span class="mi">badge</span></span>Create Admin</a></li>
+      <li><a href="#admins-list"><span class="nav-icon"><span class="mi">list_alt</span></span>Admins</a></li>
+      <li><a href="#" class="logout-btn"><span class="nav-icon"><span class="mi">logout</span></span>Logout</a></li>
+    </ul>
+  </aside>
+  <main class="dash-main">
+    <div class="dash-header animate-fade-down"><div><h1>State Manager Dashboard</h1><p style="color:var(--text2)">Manage admins across your state</p></div></div>
+    <div class="stats-grid" id="state-stats" style="margin-bottom:28px"><div class="stat-card"><div class="skeleton" style="height:50px"></div></div><div class="stat-card"><div class="skeleton" style="height:50px"></div></div><div class="stat-card"><div class="skeleton" style="height:50px"></div></div></div>
+    <div id="create-admin" class="card animate-fade-up" style="margin-bottom:24px">
+      <h3 class="card-title" style="margin-bottom:14px">Create Admin</h3><div id="ca-alert"></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Name *</label><input id="ca-name" class="form-control"></div><div class="form-group"><label class="form-label">Place *</label><select id="ca-place" class="form-control"><option value="">Select…</option></select></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Email *</label><input id="ca-email" type="email" class="form-control"></div><div class="form-group"><label class="form-label">Phone *</label><input id="ca-phone" class="form-control"></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Password *</label><input id="ca-pass" type="password" class="form-control"></div><div class="form-group" style="display:flex;align-items:flex-end"><button id="ca-btn" class="btn btn-primary" style="width:100%;justify-content:center">Create Admin</button></div></div>
+    </div>
+    <div id="admins-list"><div class="dash-header"><h2 style="font-size:1rem">Admins in Your State</h2><button class="btn btn-ghost btn-sm" onclick="loadAdmins()"><span class="mi">refresh</span></button></div><div id="admins-table">Loading…</div></div>
+  </main>
+</div>
+<script src="/js/api.js"></script>
+<script src="/js/navbar.js"></script>
+<script>
+  API.requireRole('STATE_MANAGER');
+  async function loadStats(){try{const s=await API.get('/state/stats');document.getElementById('state-stats').innerHTML=`
+    <div class="stat-card"><div class="card-icon amber" style="margin-bottom:8px"><span class="mi">directions_car</span></div><div class="stat-value" id="st-v">0</div><div class="stat-label">Vehicles Today</div></div>
+    <div class="stat-card"><div class="card-icon green" style="margin-bottom:8px"><span class="mi">payments</span></div><div class="stat-value" id="st-r">₹0</div><div class="stat-label">Revenue Today</div></div>
+    <div class="stat-card"><div class="card-icon blue" style="margin-bottom:8px"><span class="mi">local_parking</span></div><div class="stat-value" id="st-a">0</div><div class="stat-label">Available</div></div>`;
+    animateCount(document.getElementById('st-v'),s.totalVehicles);document.getElementById('st-r').textContent=fmt.money(s.totalRevenue);animateCount(document.getElementById('st-a'),s.availableSpaces);}catch(e){}}
+  async function loadPlaces(){try{const places=await API.get('/places',false);const sel=document.getElementById('ca-place');sel.innerHTML='<option value="">Select…</option>';places.forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.name;sel.appendChild(o);});}catch(e){}}
+  async function loadAdmins(){try{const list=await API.get('/state/admins');const el=document.getElementById('admins-table');if(!list.length){el.innerHTML='<div class="card" style="padding:20px;color:var(--text3)">No admins yet.</div>';return;}
+    el.innerHTML=`<div class="table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Manages</th><th>Status</th></tr></thead><tbody>${list.filter(u=>u.role==='ADMIN').map(u=>`<tr><td style="font-weight:600">${u.name}</td><td>${u.email}</td><td>${u.phone||'—'}</td><td style="color:var(--accent)">${u.managedPlace||'—'}</td><td><span class="badge badge-${u.active?'green':'red'}">${u.active?'Active':'Off'}</span></td></tr>`).join('')}</tbody></table></div>`;}catch(e){document.getElementById('admins-table').innerHTML=`<div class="alert alert-danger">${e.message}</div>`;}}
+  document.getElementById('ca-btn').addEventListener('click',async()=>{
+    const name=document.getElementById('ca-name').value.trim(),email=document.getElementById('ca-email').value.trim(),phone=document.getElementById('ca-phone').value.trim(),password=document.getElementById('ca-pass').value,placeId=parseInt(document.getElementById('ca-place').value);
+    if(!name||!email||!phone||!password||!placeId){document.getElementById('ca-alert').innerHTML='<div class="alert alert-danger">Fill all fields.</div>';return;}
+    try{await API.post('/state/admins',{name,email,password,phone,role:'ADMIN',placeId});Toast.success('Admin created!');loadAdmins();}catch(e){document.getElementById('ca-alert').innerHTML=`<div class="alert alert-danger">${e.message}</div>`;}
+  });
+  loadStats();loadPlaces();loadAdmins();
+</script>
+</body></html>

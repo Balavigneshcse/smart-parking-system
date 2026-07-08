@@ -1,0 +1,91 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Bookings · SmartPark</title>
+<link rel="stylesheet" href="/css/main.css">
+</head><body>
+<div class="bg-mesh"></div>
+<nav class="navbar">
+  <div class="inner">
+    <a href="/" class="brand"><div class="brand-icon">P</div><span class="brand-name">SmartPark</span></a>
+    <ul class="nav-links">
+      <li><a href="/customer/dashboard.html">Dashboard</a></li>
+      <li><a href="/customer/my-reservations.html" class="active">My Bookings</a></li>
+      <li><a href="#" class="logout-btn btn-nav">Logout</a></li>
+    </ul>
+    <div class="hamburger" onclick="document.querySelector('.nav-links').classList.toggle('open')"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+<div class="page-wrapper" style="padding:32px 0 60px">
+  <div class="container">
+    <div class="dash-header animate-fade-down">
+      <div><h1>My Reservations</h1><p style="color:var(--text2)">All your parking bookings</p></div>
+      <a href="/customer/book.html" class="btn btn-primary btn-sm">+ New Booking</a>
+    </div>
+    <div id="res-list"><div style="display:flex;justify-content:center;padding:48px"><div class="spinner spinner-lg"></div></div></div>
+  </div>
+</div>
+
+<!-- QR Gate Pass modal -->
+<div class="modal-overlay" id="qr-modal">
+  <div class="modal-box" style="max-width:360px;text-align:center">
+    <div class="modal-title">Gate Pass</div>
+    <p style="color:var(--shade-50);font-size:14px;margin-bottom:16px">Show this at the gate to check in instantly.</p>
+    <div id="qr-canvas" style="display:flex;justify-content:center;padding:16px;background:#fff;border-radius:var(--r-md)"></div>
+    <div id="qr-ref" style="font-family:ui-monospace,monospace;font-weight:600;margin-top:14px;letter-spacing:1px"></div>
+    <div class="modal-footer" style="justify-content:center">
+      <button class="btn btn-primary" onclick="document.getElementById('qr-modal').classList.remove('open')">Done</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/navbar.js"></script>
+<script>
+  API.requireRole('CUSTOMER');
+  const statusColor={CONFIRMED:'blue',CHECKED_IN:'green',COMPLETED:'gray',CANCELLED:'red',EXPIRED:'red',PENDING:'amber'};
+  async function load(){
+    try{
+      const list=await API.get('/reservations/mine');const el=document.getElementById('res-list');
+      if(!list.length){el.innerHTML=`<div class="card" style="text-align:center;padding:60px"><div style="font-size:48px;margin-bottom:16px"><span class="mi">local_parking</span></div><h3>No bookings yet</h3><p style="color:var(--text3);margin:12px 0">Book your first parking space!</p><a href="/customer/book.html" class="btn btn-primary">Book Parking</a></div>`;return;}
+      el.innerHTML=`<div class="table-wrap animate-fade-up"><table>
+        <thead><tr><th>Reference</th><th>Place / Space</th><th>Vehicle</th><th>From</th><th>To</th><th>Fee</th><th>Payment</th><th>Status</th><th>Pass</th></tr></thead>
+        <tbody>${list.map(r=>`<tr>
+          <td><code style="color:var(--accent);font-size:.82rem">${r.reference}</code></td>
+          <td>${r.placeName}<br><span style="color:var(--text3);font-size:.78rem">${r.zoneCode} · ${r.spaceCode} · ${r.spaceType}</span></td>
+          <td style="font-family:monospace;font-size:.85rem">${fmt.plate(r.plateNumber)}<br><span style="color:var(--text3);font-size:.75rem">${r.vehicleType}</span></td>
+          <td style="font-size:.82rem">${r.startsAt}</td><td style="font-size:.82rem">${r.endsAt}</td>
+          <td style="color:var(--emerald);font-weight:700">${fmt.money(r.quotedAmount)}</td>
+          <td><span class="badge badge-purple">${r.paymentMode||'—'}</span></td>
+          <td><span class="badge badge-${statusColor[r.status]||'gray'}">${r.status}</span></td>
+          <td>${
+            r.status==='COMPLETED'
+              ? `<button class="btn btn-ghost btn-sm" title="Download receipt" onclick="downloadReceipt(${r.id})"><span class="mi">receipt_long</span></button>`
+              : (r.status==='CONFIRMED'||r.status==='CHECKED_IN')
+                ? `<button class="btn btn-ghost btn-sm" title="Gate pass QR" onclick="showQR('${r.reference}')"><span class="mi">qr_code_2</span></button>`
+                : '—'}</td>
+        </tr>`).join('')}</tbody></table></div>`;
+    }catch(e){Toast.error(e.message);}
+  }
+
+  function showQR(reference){
+    const box=document.getElementById('qr-canvas');
+    box.innerHTML='';
+    new QRCode(box,{text:reference,width:220,height:220,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+    document.getElementById('qr-ref').textContent=reference;
+    document.getElementById('qr-modal').classList.add('open');
+  }
+  document.getElementById('qr-modal').addEventListener('click',e=>{if(e.target.id==='qr-modal')e.currentTarget.classList.remove('open');});
+
+  async function downloadReceipt(reservationId){
+    try{
+      const r=await API.get('/reservations/'+reservationId+'/receipt');
+      downloadReceiptPDF(r);
+      Toast.success('Receipt downloaded');
+    }catch(e){Toast.error(e.message);}
+  }
+
+  load();
+</script>
+</body></html>

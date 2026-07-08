@@ -1,0 +1,306 @@
+{
+  "info": {
+    "name": "Smart Parking System",
+    "_postman_id": "smart-parking-v1",
+    "description": "Complete API collection for Smart Parking System — Spring Boot 4.1.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8080/api" },
+    { "key": "customer_token", "value": "" },
+    { "key": "admin_token", "value": "" },
+    { "key": "staff_token", "value": "" },
+    { "key": "super_token", "value": "" },
+    { "key": "place_id", "value": "1" },
+    { "key": "session_id", "value": "" },
+    { "key": "reservation_ref", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01 — Auth",
+      "item": [
+        {
+          "name": "Register Customer",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Arjun Kumar\",\n  \"email\": \"arjun@example.com\",\n  \"password\": \"Test@1234\",\n  \"phone\": \"9876543210\",\n  \"dateOfBirth\": \"1995-05-15\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "if (pm.response.code === 200) {",
+            "  pm.collectionVariables.set('customer_token', pm.response.json().token);",
+            "  pm.test('Register OK', () => pm.response.to.have.status(200));",
+            "}"
+          ]}}]
+        },
+        {
+          "name": "Login — Customer",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"arjun@example.com\",\n  \"password\": \"Test@1234\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "if (pm.response.code === 200) pm.collectionVariables.set('customer_token', pm.response.json().token);",
+            "pm.test('Login OK', () => pm.response.to.have.status(200));"
+          ]}}]
+        },
+        {
+          "name": "Login — Super Admin",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"superadmin@smartparking.com\",\n  \"password\": \"SuperAdmin@123\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "if (pm.response.code === 200) pm.collectionVariables.set('super_token', pm.response.json().token);",
+            "pm.test('Super Login OK', () => pm.response.to.have.status(200));"
+          ]}}]
+        }
+      ]
+    },
+    {
+      "name": "02 — Places (Public)",
+      "item": [
+        {
+          "name": "List All Places",
+          "request": { "method": "GET", "url": "{{base_url}}/places" }
+        },
+        {
+          "name": "Get Occupancy Map",
+          "request": { "method": "GET", "url": "{{base_url}}/places/{{place_id}}/occupancy" }
+        }
+      ]
+    },
+    {
+      "name": "03 — Customer Reservations",
+      "item": [
+        {
+          "name": "Create Reservation",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/reservations",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{customer_token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"placeId\": {{place_id}},\n  \"spaceType\": \"REGULAR\",\n  \"startsAt\": \"2026-07-01T10:00:00\",\n  \"endsAt\": \"2026-07-01T14:00:00\",\n  \"plateNumber\": \"TN09AB1234\",\n  \"vehicleType\": \"CAR\",\n  \"ownerName\": \"Arjun Kumar\",\n  \"ownerPhone\": \"9876543210\",\n  \"ownerEmail\": \"arjun@example.com\",\n  \"paymentMode\": \"ON_SPOT\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "if (pm.response.code === 200) pm.collectionVariables.set('reservation_ref', pm.response.json().reference);",
+            "pm.test('Reservation created', () => pm.response.to.have.status(200));"
+          ]}}]
+        },
+        {
+          "name": "My Reservations",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/reservations/mine",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customer_token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 — Gate Operations",
+      "item": [
+        {
+          "name": "Login Staff (get token)",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"manager@airport.com\",\n  \"password\": \"Test@1234\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "if (pm.response.code === 200) pm.collectionVariables.set('staff_token', pm.response.json().token);"
+          ]}}]
+        },
+        {
+          "name": "Check Vehicle by Plate",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/gate/check/TN09AB1234",
+            "header": [{ "key": "Authorization", "value": "Bearer {{staff_token}}" }]
+          }
+        },
+        {
+          "name": "Mark Entry (Registered)",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/gate/entry",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{staff_token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"plateNumber\": \"TN09AB1234\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "if (pm.response.code === 200) pm.collectionVariables.set('session_id', pm.response.json().id);"
+          ]}}]
+        },
+        {
+          "name": "On-Spot Registration + Entry",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/gate/entry/on-spot",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{staff_token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"plateNumber\": \"TN07CD5678\",\n  \"vehicleType\": \"CAR\",\n  \"ownerName\": \"Priya Sharma\",\n  \"ownerPhone\": \"9123456789\",\n  \"ownerEmail\": \"priya@email.com\"\n}" }
+          }
+        },
+        {
+          "name": "Mark Exit",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/gate/exit/{{session_id}}",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{staff_token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"paymentMethod\": \"CASH\"\n}" }
+          }
+        },
+        {
+          "name": "Active Sessions",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/gate/sessions/active",
+            "header": [{ "key": "Authorization", "value": "Bearer {{staff_token}}" }]
+          }
+        },
+        {
+          "name": "Today's Sessions",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/gate/sessions/today",
+            "header": [{ "key": "Authorization", "value": "Bearer {{staff_token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 — Admin Panel",
+      "item": [
+        {
+          "name": "Login Admin",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@chennai.com\",\n  \"password\": \"Test@1234\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "if (pm.response.code === 200) pm.collectionVariables.set('admin_token', pm.response.json().token);"
+          ]}}]
+        },
+        {
+          "name": "Admin Stats — Daily",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/admin/stats/daily",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }]
+          }
+        },
+        {
+          "name": "Admin Stats — Weekly",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/admin/stats/weekly",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }]
+          }
+        },
+        {
+          "name": "Admin Stats — Monthly",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/admin/stats/monthly",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }]
+          }
+        },
+        {
+          "name": "List Staff",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/admin/staff",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }]
+          }
+        },
+        {
+          "name": "Add Staff",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/admin/staff",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Gate Staff\",\n  \"email\": \"gate1@airport.com\",\n  \"password\": \"Test@1234\",\n  \"phone\": \"9988776655\",\n  \"staffRole\": \"SECURITY\"\n}" }
+          }
+        },
+        {
+          "name": "Place Reservations",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/admin/reservations",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 — Super Admin",
+      "item": [
+        {
+          "name": "System Stats",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/super/stats",
+            "header": [{ "key": "Authorization", "value": "Bearer {{super_token}}" }]
+          }
+        },
+        {
+          "name": "All Places",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/super/places",
+            "header": [{ "key": "Authorization", "value": "Bearer {{super_token}}" }]
+          }
+        },
+        {
+          "name": "Create State Manager",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/super/state-managers",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{super_token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"TN State Manager\",\n  \"email\": \"tn.manager@smartparking.com\",\n  \"password\": \"Test@1234\",\n  \"phone\": \"9876543000\",\n  \"role\": \"STATE_MANAGER\",\n  \"stateId\": 1\n}" }
+          }
+        },
+        {
+          "name": "Create Admin",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/super/admins",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{super_token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Chennai Admin\",\n  \"email\": \"admin@chennai.com\",\n  \"password\": \"Test@1234\",\n  \"phone\": \"9876540001\",\n  \"role\": \"ADMIN\",\n  \"placeId\": 1\n}" }
+          }
+        },
+        {
+          "name": "All Users",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/super/users",
+            "header": [{ "key": "Authorization", "value": "Bearer {{super_token}}" }]
+          }
+        },
+        {
+          "name": "All Admins",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/super/admins",
+            "header": [{ "key": "Authorization", "value": "Bearer {{super_token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 — Health",
+      "item": [
+        {
+          "name": "Ping",
+          "request": { "method": "GET", "url": "http://localhost:8080/api/ping" }
+        },
+        {
+          "name": "Actuator Health",
+          "request": { "method": "GET", "url": "http://localhost:8080/actuator/health" }
+        }
+      ]
+    }
+  ]
+}

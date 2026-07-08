@@ -1,0 +1,222 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Book Parking · SmartPark</title>
+<link rel="stylesheet" href="/css/main.css">
+</head><body>
+<div class="bg-mesh"></div>
+<nav class="navbar">
+  <div class="inner">
+    <a href="/customer/dashboard.html" class="brand"><div class="brand-icon">P</div><span class="brand-name">SmartPark</span></a>
+    <ul class="nav-links">
+      <li><a href="/customer/dashboard.html">Dashboard</a></li>
+      <li><a href="/customer/my-reservations.html">My Bookings</a></li>
+      <li><a href="#" class="logout-btn btn-nav">Logout</a></li>
+    </ul>
+    <div class="hamburger" onclick="document.querySelector('.nav-links').classList.toggle('open')"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+<div class="page-wrapper" style="padding:32px 0 60px">
+  <div class="container" style="max-width:700px">
+    <div class="animate-fade-down" style="margin-bottom:24px">
+      <h1 style="font-size:1.6rem">Book a Parking Space</h1>
+      <p style="color:var(--text2);margin-top:4px">Fill in details to reserve your spot.</p>
+    </div>
+
+    <div class="card animate-slide-up" style="margin-bottom:16px;padding:0">
+      <button onclick="togglePricing()" style="width:100%;background:none;border:none;color:inherit;cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:14px 20px;font-weight:700;font-size:.88rem">
+        <span>Pricing Guide <span style="color:var(--text3);font-weight:400;font-size:.78rem">(per hour · min 1 hr)</span></span>
+        <span class="mi" id="pricing-toggle-icon">expand_more</span>
+      </button>
+      <div id="pricing-body" style="display:none;padding:0 20px 20px"><div id="pricing-content"><div style="display:flex;justify-content:center;padding:16px"><div class="spinner"></div></div></div></div>
+    </div>
+
+    <div class="steps">
+      <div class="step-item active" id="s1"><div class="step-num">1</div><span class="step-label">Details</span></div>
+      <div class="step-connector" id="sc1"></div>
+      <div class="step-item" id="s2"><div class="step-num">2</div><span class="step-label">Vehicle</span></div>
+      <div class="step-connector" id="sc2"></div>
+      <div class="step-item" id="s3"><div class="step-num">3</div><span class="step-label">Confirm</span></div>
+    </div>
+    <div id="alert-area"></div>
+    <div class="card animate-slide-up">
+
+      <!-- Step 1 -->
+      <div class="step-panel active" id="panel-1">
+        <div class="form-section-title">Booking Details</div>
+        <div class="form-group"><label class="form-label">Parking Place *</label><select id="place-id" class="form-control"><option value="">Select place…</option></select></div>
+        <div class="form-group"><label class="form-label">Space Type *</label>
+          <select id="space-type" class="form-control"><option value="REGULAR">Regular</option><option value="COMPACT">Compact</option><option value="EV">EV Charging</option><option value="ACCESSIBLE">Accessible</option></select></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Start *</label><input id="start-at" type="datetime-local" class="form-control"><div class="form-hint">Cannot be in the past</div></div>
+          <div class="form-group"><label class="form-label">End *</label><input id="end-at" type="datetime-local" class="form-control"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Payment Mode *</label>
+          <select id="payment-mode" class="form-control"><option value="ONLINE">Online (Razorpay)</option><option value="ON_SPOT">On-Spot (Pay at Gate)</option></select></div>
+        <div id="surge-banner" style="display:none;align-items:center;gap:8px;padding:10px 14px;margin-bottom:14px;border-radius:var(--radius-sm);font-size:14px"></div>
+        <div id="fee-preview" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--text3);font-size:.85rem">Estimated Fee</span><span id="fee-amount" style="font-size:1.1rem;font-weight:800;color:var(--emerald)"></span></div>
+          <div id="surge-note" style="display:none;font-size:12px;color:var(--shade-50);margin-top:4px"></div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="goStep(2)">Next: Vehicle Info <span class="mi" style="font-size:1em">arrow_forward</span></button>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-panel" id="panel-2">
+        <div class="form-section-title">Vehicle Information</div>
+        <div class="form-group"><label class="form-label">Number Plate *</label>
+          <input id="plate" class="form-control" placeholder="TN09AB1234" maxlength="12" style="font-family:monospace;letter-spacing:2px;text-transform:uppercase">
+          <div class="form-hint">Indian format: TN09AB1234</div><div id="plate-error" class="form-error"></div></div>
+        <div class="form-group"><label class="form-label">Vehicle Type *</label>
+          <select id="vehicle-type" class="form-control"><option value="CAR">Car</option><option value="BIKE">Bike</option><option value="BUS">Bus</option><option value="TRUCK">Truck</option><option value="VAN">Van</option></select></div>
+        <div class="form-section-title" style="margin-top:8px">Owner</div>
+        <div class="form-group"><label class="form-label">Name *</label><input id="owner-name" class="form-control" placeholder="Full name"></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Phone *</label><input id="owner-phone" class="form-control" placeholder="9876543210" maxlength="10"></div>
+          <div class="form-group"><label class="form-label">Email</label><input id="owner-email" type="email" class="form-control" placeholder="optional"></div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="goStep(1)"><span class="mi" style="font-size:1em">arrow_back</span> Back</button>
+          <button class="btn btn-primary" style="flex:2;justify-content:center" onclick="goStep(3)">Review <span class="mi" style="font-size:1em">arrow_forward</span></button>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-panel" id="panel-3">
+        <div class="form-section-title">Booking Summary</div>
+        <div id="summary" style="background:var(--surface2);border-radius:var(--radius-sm);padding:18px;margin-bottom:18px"></div>
+        <div id="onspot-section">
+          <div class="alert alert-info">Payment at gate — show booking reference to staff.</div>
+          <div style="display:flex;gap:10px;margin-top:12px">
+            <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="goStep(2)"><span class="mi" style="font-size:1em">arrow_back</span> Edit</button>
+            <button id="confirm-btn" class="btn btn-primary" style="flex:2;justify-content:center">
+              <span id="conf-text">Confirm Reservation</span><span id="conf-spin" style="display:none" class="spinner"></span>
+            </button>
+          </div>
+        </div>
+        <div id="online-section" style="display:none">
+          <div class="alert alert-info">You'll be redirected to Razorpay for secure payment.</div>
+          <div style="display:flex;gap:10px;margin-top:12px">
+            <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="goStep(2)"><span class="mi" style="font-size:1em">arrow_back</span> Edit</button>
+            <button id="pay-btn" class="btn btn-primary" style="flex:2;justify-content:center">
+              <span id="pay-text">Confirm & Pay ₹<span id="pay-amount"></span></span><span id="pay-spin" style="display:none" class="spinner"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/navbar.js"></script>
+<script>
+  API.requireRole('CUSTOMER');
+  const params=new URLSearchParams(location.search);let createdReservationId=null;
+  function setDatetimeMins(){const n=new Date().toISOString().slice(0,16);document.getElementById('start-at').min=n;}
+  setDatetimeMins();setInterval(setDatetimeMins,60000);
+  document.getElementById('start-at').addEventListener('change',()=>{const v=document.getElementById('start-at').value;document.getElementById('end-at').min=v;const e=document.getElementById('end-at');if(e.value&&e.value<=v){const d=new Date(v);d.setHours(d.getHours()+1);e.value=d.toISOString().slice(0,16);}updateFee();});
+  function validatePlate(p){return /^[A-Z]{2}\d{2}[A-Z]{1,3}\d{1,4}$/.test(p.toUpperCase().replace(/\s+/g,''));}
+  document.getElementById('plate').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase();const v=e.target.value.replace(/\s+/g,'');document.getElementById('plate-error').textContent=v.length>3&&!validatePlate(v)?'Invalid format':'';});
+
+  let ratesMap={};
+  async function loadPlaces(){const sel=document.getElementById('place-id');try{const places=await API.get('/places',false);places.forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.name;sel.appendChild(o);});if(params.get('placeId'))sel.value=params.get('placeId');if(params.get('spaceType'))document.getElementById('space-type').value=params.get('spaceType');}catch(e){Toast.error(e.message);}}
+  async function loadPrices(){try{const prices=await fetch('/api/prices').then(r=>r.json());prices.forEach(p=>{ratesMap[p.spaceType+'_'+p.vehicleType]=parseFloat(p.ratePerHour);});renderPricingTable(prices);}catch(e){document.getElementById('pricing-content').innerHTML='<p style="color:var(--text3);font-size:.82rem">Unable to load pricing.</p>';}}
+
+  function renderPricingTable(prices){
+    const spaceTypes=[...new Set(prices.map(p=>p.spaceType))],vehicles=['CAR','BIKE','VAN','BUS','TRUCK'];
+    let html='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.8rem"><thead><tr><th style="text-align:left;padding:6px;border-bottom:1px solid var(--border);color:var(--text3)">Space</th>';
+    vehicles.forEach(v=>{html+=`<th style="text-align:center;padding:6px;border-bottom:1px solid var(--border);color:var(--text3)">${v}</th>`;});
+    html+='</tr></thead><tbody>';
+    spaceTypes.forEach(st=>{html+=`<tr><td style="padding:6px;font-weight:600;color:var(--accent)">${st}</td>`;vehicles.forEach(v=>{const r=prices.find(p=>p.spaceType===st&&p.vehicleType===v);html+=`<td style="text-align:center;padding:6px;color:var(--emerald)">${r?'₹'+parseFloat(r.ratePerHour).toFixed(0)+'/hr':'—'}</td>`;});html+='</tr>';});
+    html+='</tbody></table></div>';document.getElementById('pricing-content').innerHTML=html;
+  }
+  function togglePricing(){const b=document.getElementById('pricing-body'),i=document.getElementById('pricing-toggle-icon');const open=b.style.display==='none';b.style.display=open?'block':'none';i.textContent=open?'expand_less':'expand_more';}
+
+  const nowD=new Date();nowD.setMinutes(Math.ceil(nowD.getMinutes()/15)*15,0,0);const laterD=new Date(nowD.getTime()+2*3600000);const toLocal=d=>d.toISOString().slice(0,16);
+  document.getElementById('start-at').value=toLocal(nowD);document.getElementById('end-at').value=toLocal(laterD);document.getElementById('end-at').min=toLocal(nowD);
+
+  function updateFee(){
+    const s=document.getElementById('start-at').value,e=document.getElementById('end-at').value;if(!s||!e)return;
+    const hrs=Math.ceil((new Date(e)-new Date(s))/3600000);if(hrs<=0)return;
+    const spaceType=document.getElementById('space-type').value,vehicleType=document.getElementById('vehicle-type')?.value||'CAR';
+    const key=spaceType+'_'+vehicleType;
+    const defaults={REGULAR_CAR:50,REGULAR_BIKE:20,REGULAR_BUS:120,REGULAR_TRUCK:100,REGULAR_VAN:70,COMPACT_CAR:40,COMPACT_BIKE:15,COMPACT_BUS:80,COMPACT_TRUCK:80,COMPACT_VAN:55,EV_CAR:80,EV_BIKE:35,EV_BUS:150,EV_TRUCK:130,EV_VAN:100,ACCESSIBLE_CAR:40,ACCESSIBLE_BIKE:15,ACCESSIBLE_BUS:100,ACCESSIBLE_TRUCK:80,ACCESSIBLE_VAN:60};
+    const rate=ratesMap[key]!==undefined?ratesMap[key]:(defaults[key]||50);
+    const base=hrs*rate;
+    const fee=Math.round(base*surgeMultiplier*100)/100;
+    document.getElementById('fee-preview').style.display='block';
+    document.getElementById('fee-amount').textContent='₹'+fee.toLocaleString('en-IN',{minimumFractionDigits:2});
+    document.getElementById('pay-amount').textContent=fee.toLocaleString('en-IN',{minimumFractionDigits:2});
+    const note=document.getElementById('surge-note');
+    if(surgeMultiplier>1){note.style.display='block';note.textContent=`Base ₹${base.toLocaleString('en-IN',{minimumFractionDigits:2})} × ${surgeMultiplier} surge (high demand).`;}
+    else{note.style.display='none';}
+  }
+
+  // ── Dynamic surge pricing ────────────────────────────────────────────────
+  let surgeMultiplier=1;
+  async function loadSurge(){
+    const pid=document.getElementById('place-id').value;
+    const banner=document.getElementById('surge-banner');
+    if(!pid){surgeMultiplier=1;banner.style.display='none';updateFee();return;}
+    try{
+      const s=await fetch('/api/places/'+pid+'/surge').then(r=>r.json());
+      surgeMultiplier=parseFloat(s.multiplier)||1;
+      const styles={NORMAL:['var(--pistachio)','var(--ink)','check_circle'],BUSY:['#faf3d9','#7a5600','trending_up'],HIGH:['#faf3d9','#7a5600','local_fire_department'],PEAK:['#fde8e6','#8a1c14','bolt']};
+      const [bg,fg,icon]=styles[s.level]||styles.NORMAL;
+      if(s.level==='NORMAL'){banner.style.display='none';}
+      else{
+        banner.style.display='flex';banner.style.background=bg;banner.style.color=fg;
+        banner.innerHTML=`<span class="mi">${icon}</span> <strong>${s.level} demand</strong> · ${s.occupancyPct}% full · surge ×${s.multiplier}`;
+      }
+    }catch(e){surgeMultiplier=1;banner.style.display='none';}
+    updateFee();
+  }
+
+  ['end-at','space-type','vehicle-type'].forEach(id=>{document.getElementById(id)?.addEventListener('change',updateFee);});
+  document.getElementById('place-id').addEventListener('change',loadSurge);
+
+  function showAlert(msg,type='danger'){document.getElementById('alert-area').innerHTML=`<div class="alert alert-${type}">${msg}</div>`;}
+
+  function goStep(n){
+    if(n===2){if(!document.getElementById('place-id').value){showAlert('Select a place.');return;}const s=new Date(document.getElementById('start-at').value),e=new Date(document.getElementById('end-at').value);if(!document.getElementById('start-at').value||!document.getElementById('end-at').value){showAlert('Select valid dates.');return;}if(s<new Date(Date.now()-5*60000)){showAlert('Start time cannot be in the past.');return;}if(e<=s){showAlert('End must be after start.');return;}}
+    if(n===3){const plate=document.getElementById('plate').value.replace(/\s+/g,'');if(!validatePlate(plate)){showAlert('Invalid plate number.');return;}if(!document.getElementById('owner-name').value.trim()){showAlert('Owner name required.');return;}buildSummary();const isOnline=document.getElementById('payment-mode').value==='ONLINE';document.getElementById('onspot-section').style.display=isOnline?'none':'block';document.getElementById('online-section').style.display=isOnline?'block':'none';}
+    [1,2,3].forEach(i=>{document.getElementById('panel-'+i).classList.toggle('active',i===n);document.getElementById('s'+i).className='step-item'+(i<n?' done':i===n?' active':'');if(i<n)document.getElementById('sc'+i)?.classList.add('done');});
+    document.getElementById('alert-area').innerHTML='';window.scrollTo(0,0);
+  }
+
+  function buildSummary(){
+    const pName=document.getElementById('place-id').selectedOptions[0]?.text||'';
+    document.getElementById('summary').innerHTML=`
+      <div class="vehicle-info-row"><span class="label">Location</span><span class="val">${pName}</span></div>
+      <div class="vehicle-info-row"><span class="label">Space</span><span class="val">${document.getElementById('space-type').value}</span></div>
+      <div class="vehicle-info-row"><span class="label">From</span><span class="val">${document.getElementById('start-at').value.replace('T',' ')}</span></div>
+      <div class="vehicle-info-row"><span class="label">To</span><span class="val">${document.getElementById('end-at').value.replace('T',' ')}</span></div>
+      <div class="vehicle-info-row"><span class="label">Vehicle</span><span class="val" style="font-family:monospace">${document.getElementById('plate').value.toUpperCase()}</span></div>
+      <div class="vehicle-info-row"><span class="label">Owner</span><span class="val">${document.getElementById('owner-name').value}</span></div>
+      <div class="vehicle-info-row"><span class="label">Payment</span><span class="val">${document.getElementById('payment-mode').value}</span></div>
+      <div class="vehicle-info-row"><span class="label">Fee</span><span class="val" style="color:var(--emerald);font-weight:800">${document.getElementById('fee-amount').textContent||'—'}</span></div>`;
+  }
+
+  async function createReservation(){return await API.post('/reservations',{placeId:parseInt(document.getElementById('place-id').value),spaceType:document.getElementById('space-type').value,startsAt:document.getElementById('start-at').value+':00',endsAt:document.getElementById('end-at').value+':00',plateNumber:document.getElementById('plate').value.toUpperCase().replace(/\s+/g,''),vehicleType:document.getElementById('vehicle-type').value,ownerName:document.getElementById('owner-name').value.trim(),ownerPhone:document.getElementById('owner-phone').value.trim(),ownerEmail:document.getElementById('owner-email').value.trim()||null,paymentMode:document.getElementById('payment-mode').value});}
+
+  document.getElementById('confirm-btn').addEventListener('click',async()=>{
+    document.getElementById('conf-text').style.display='none';document.getElementById('conf-spin').style.display='';document.getElementById('confirm-btn').disabled=true;
+    try{const res=await createReservation();Toast.success('Booking confirmed! Ref: '+res.reference);setTimeout(()=>window.location.href='/customer/my-reservations.html',1000);}
+    catch(e){showAlert(e.message);document.getElementById('conf-text').style.display='';document.getElementById('conf-spin').style.display='none';document.getElementById('confirm-btn').disabled=false;}
+  });
+
+  document.getElementById('pay-btn').addEventListener('click',async()=>{
+    document.getElementById('pay-text').style.display='none';document.getElementById('pay-spin').style.display='';document.getElementById('pay-btn').disabled=true;
+    try{
+      const res=await createReservation();createdReservationId=res.id;
+      const order=await API.post(`/payments/razorpay/create-order/${res.id}`);const user=API.user();
+      const rzp=new Razorpay({key:order.keyId,amount:Math.round(parseFloat(order.amount)*100),currency:order.currency,name:'SmartPark',description:order.description,order_id:order.razorpayOrderId,prefill:{name:user?.name||'',email:user?.email||''},theme:{color:'#6366f1'},
+        handler:async function(response){try{await API.post('/payments/razorpay/verify',{razorpayOrderId:response.razorpay_order_id,razorpayPaymentId:response.razorpay_payment_id,razorpaySignature:response.razorpay_signature,reservationId:createdReservationId});Toast.success('Payment successful!');setTimeout(()=>window.location.href='/customer/my-reservations.html',1000);}catch(e){Toast.error('Verification failed: '+e.message);}},
+        modal:{ondismiss:()=>{Toast.info('Payment cancelled. Booking saved.');setTimeout(()=>window.location.href='/customer/my-reservations.html',1200);}}
+      });rzp.open();
+    }catch(e){showAlert(e.message);document.getElementById('pay-text').style.display='';document.getElementById('pay-spin').style.display='none';document.getElementById('pay-btn').disabled=false;}
+  });
+
+  loadPlaces().then(loadSurge);loadPrices();updateFee();
+</script>
+</body></html>
