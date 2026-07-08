@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/smartparking
     username: postgres
-    password: Bala@sql
+    password: postgres
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -26,8 +26,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: smart.parking.system.project@gmail.com
-    password: gzda vama uhit zrjh
+    username: smart@gmail.com
+    password: your app password
     properties:
       mail:
         smtp:
@@ -55,8 +55,8 @@ app:
     phone: "9999999999"
   razorpay:
     enabled: true                        # ← set true after adding your keys
-    key-id: rzp_test_T7saBCPuwu9dBK          # ← paste your Razorpay Test Key ID
-    key-secret: uFocmeX2uLJtRc9XkTO9djAd           # ← paste your Razorpay Test Key Secret
+    key-id:           # ← paste your Razorpay Test Key ID
+    key-secret:            # ← paste your Razorpay Test Key Secret
     currency: INR
 
 management:
