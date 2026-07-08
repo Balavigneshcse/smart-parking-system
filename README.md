@@ -4,7 +4,7 @@
 
 ---
 
-##  Quick Start (5 steps
+##  Quick Start (5 steps)
 
 ### 1 — Prerequisites
 | Tool | Version | Download |
